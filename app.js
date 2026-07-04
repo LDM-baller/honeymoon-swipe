@@ -6,6 +6,12 @@
   var byId = {};
   CARDS.forEach(function (c) { byId[c.id] = c; });
 
+  // Shuffle the deck on every visit (Fisher–Yates) so order isn't fixed
+  for (var s = CARDS.length - 1; s > 0; s--) {
+    var r = Math.floor(Math.random() * (s + 1));
+    var tmp = CARDS[s]; CARDS[s] = CARDS[r]; CARDS[r] = tmp;
+  }
+
   var state = {
     name: "",
     idx: 0,
@@ -300,6 +306,12 @@
 
   $("btn-copy-brief").addEventListener("click", function () {
     copy($("claude-brief").value); this.textContent = "Copied ✓";
+  });
+
+  $("btn-open-claude").addEventListener("click", function () {
+    copy($("claude-brief").value);
+    this.textContent = "Copied ✓ — opening Claude…";
+    window.open("https://claude.ai/new", "_blank", "noopener");
   });
 
   $("btn-restart").addEventListener("click", function () {
