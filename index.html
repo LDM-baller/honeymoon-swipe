@@ -1,0 +1,92 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Honeymoon Swipe</title>
+<link rel="stylesheet" href="styles.css">
+
+<div id="app">
+  <div class="topbar">
+    <div class="brand">Honeymoon Swipe<small>where to, you two</small></div>
+    <div class="who" id="who"></div>
+  </div>
+
+  <!-- START -->
+  <section id="screen-start" class="start">
+    <h1>Two weeks.<br>Two of you.<br>One dream trip.</h1>
+    <p>Swipe through real places the world's best travel editors love. Keep what sparks something — we'll find the pattern.</p>
+    <div class="field">
+      <label>Your name</label>
+      <input id="name-input" placeholder="e.g. Sofia" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Which of you?</label>
+      <div class="seg" id="person-seg">
+        <button data-p="A" class="ghost">Partner A</button>
+        <button data-p="B" class="ghost">Partner B</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Trip code (both use the same one)</label>
+      <input id="session-input" placeholder="e.g. sofia-and-me" autocomplete="off">
+    </div>
+    <button id="start-btn" disabled>Start swiping →</button>
+  </section>
+
+  <!-- SWIPE -->
+  <section id="screen-swipe" class="deck-wrap hidden">
+    <div class="progress" id="progress"></div>
+    <div class="deck" id="deck"></div>
+    <div class="controls">
+      <button class="circle back" id="btn-back" title="Undo">↩</button>
+      <button class="circle nope" id="btn-nope" title="Not for us">✕</button>
+      <button class="circle like" id="btn-like" title="Yes!">♥</button>
+    </div>
+  </section>
+
+  <!-- RANK -->
+  <section id="screen-rank" class="rank hidden">
+    <h2>Now rank your favourites</h2>
+    <p>Drag the top ones up — order matters for the final match.</p>
+    <ol class="rank-list" id="rank-list"></ol>
+    <button id="rank-done">Save my picks →</button>
+  </section>
+
+  <!-- RESULTS -->
+  <section id="screen-results" class="results hidden">
+    <h2 id="results-title">Your picks are saved ✓</h2>
+    <p class="sub" id="results-sub"></p>
+
+    <div class="section" id="sec-partner">
+      <h3>Bring in your partner</h3>
+      <p class="note">Paste your partner's share code below to see where you overlap. (Or send them yours and combine on one phone.)</p>
+      <textarea class="export" id="import-box" placeholder="Paste partner's share code here…"></textarea>
+      <div class="row-btns">
+        <button class="ghost" id="btn-copy">Copy my code</button>
+        <button id="btn-combine">Combine →</button>
+      </div>
+    </div>
+
+    <div id="combined" class="hidden">
+      <div class="section">
+        <h3>You both loved these</h3>
+        <div id="mutual"></div>
+      </div>
+      <div class="section">
+        <h3>Which curator you trust</h3>
+        <div id="hitrate"></div>
+      </div>
+      <div class="section">
+        <h3>The brief for Claude</h3>
+        <p class="note">Hand this to Claude to get your two-week, two-stop itinerary.</p>
+        <textarea class="export" id="claude-brief" readonly></textarea>
+        <div class="row-btns"><button id="btn-copy-brief">Copy the brief</button></div>
+      </div>
+    </div>
+
+    <div class="section" style="margin-top:26px">
+      <button class="ghost" id="btn-restart" style="width:100%">↺ Start over (swipe as the other partner)</button>
+    </div>
+  </section>
+</div>
+
+<script src="data/cards.js"></script>
+<script src="app.js"></script>
