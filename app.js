@@ -7,7 +7,7 @@
   CARDS.forEach(function (c) { byId[c.id] = c; });
 
   var state = {
-    name: "", person: "", session: "",
+    name: "",
     idx: 0,
     decisions: [],     // [{id, dir:'like'|'nope'}] in swipe order
     rankOrder: []      // liked ids, favourite-first
@@ -23,29 +23,16 @@
   /* ---------------- START ---------------- */
   var startBtn = $("start-btn");
   function checkStart() {
-    startBtn.disabled = !(
-      $("name-input").value.trim() &&
-      state.person &&
-      $("session-input").value.trim()
-    );
+    startBtn.disabled = !$("name-input").value.trim();
   }
   $("name-input").addEventListener("input", checkStart);
-  $("session-input").addEventListener("input", checkStart);
-  Array.prototype.forEach.call($("person-seg").children, function (b) {
-    b.addEventListener("click", function () {
-      state.person = b.getAttribute("data-p");
-      Array.prototype.forEach.call($("person-seg").children, function (x) {
-        x.classList.toggle("on", x === b);
-        x.classList.toggle("ghost", x !== b);
-      });
-      checkStart();
-    });
+  $("name-input").addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && !startBtn.disabled) startBtn.click();
   });
 
   startBtn.addEventListener("click", function () {
     state.name = $("name-input").value.trim();
-    state.session = $("session-input").value.trim().toLowerCase().replace(/\s+/g, "-");
-    $("who").textContent = state.name + " · " + state.person;
+    $("who").textContent = state.name;
     show("screen-swipe");
     renderDeck();
   });
@@ -211,26 +198,18 @@
   function myRecord() {
     return {
       v: 1,
-      session: state.session,
-      person: state.person,
       name: state.name,
       likes: state.rankOrder,   // favourite-first
       nopes: state.decisions.filter(function (d) { return d.dir === "nope"; }).map(function (d) { return d.id; })
     };
   }
-  function storeKey(session, person) { return "hm:" + session + ":" + person; }
 
   function saveAndShowResults() {
     var rec = myRecord();
-    try { localStorage.setItem(storeKey(rec.session, rec.person), JSON.stringify(rec)); } catch (e) {}
+    try { localStorage.setItem("hm:self", JSON.stringify(rec)); } catch (e) {}
     show("screen-results");
     $("results-sub").textContent = rec.likes.length + " favourites, ranked. Now combine with your partner.";
     myShareCode = encodeRec(rec);
-
-    // auto-combine if partner already saved on this device
-    var otherKey = storeKey(rec.session, rec.person === "A" ? "B" : "A");
-    var other = localStorage.getItem(otherKey);
-    if (other) { try { combine(rec, JSON.parse(other)); } catch (e) {} }
   }
 
   var myShareCode = "";
@@ -250,9 +229,6 @@
   });
 
   function combine(me, other) {
-    if (other.person === me.person) {
-      alert("You're both marked Partner " + me.person + ". One of you should restart and pick the other.");
-    }
     $("combined").classList.remove("hidden");
 
     // mutual likes
@@ -307,11 +283,11 @@
     L.push("Bonus: at least one off-the-beaten-path / earth experience (e.g. fossil or gem digging) is a big plus.");
     L.push("All destinations must be genuinely good to visit in late November.");
     L.push("");
-    L.push("PARTNER " + me.person + " (" + me.name + ") — favourites, most-loved first:");
+    L.push((me.name || "Partner 1") + " — favourites, most-loved first:");
     L.push(favLines(me));
     L.push("   Preference signals: " + tagTally(me.likes).join(", "));
     L.push("");
-    L.push("PARTNER " + other.person + " (" + other.name + ") — favourites, most-loved first:");
+    L.push((other.name || "Partner 2") + " — favourites, most-loved first:");
     L.push(favLines(other));
     L.push("   Preference signals: " + tagTally(other.likes).join(", "));
     L.push("");
@@ -327,17 +303,10 @@
   });
 
   $("btn-restart").addEventListener("click", function () {
-    state.idx = 0; state.decisions = []; state.rankOrder = [];
+    state.name = ""; state.idx = 0; state.decisions = []; state.rankOrder = [];
     $("combined").classList.add("hidden");
     $("import-box").value = "";
-    // flip the A/B toggle to the other partner to make combining easy
-    var other = state.person === "A" ? "B" : "A";
-    Array.prototype.forEach.call($("person-seg").children, function (x) {
-      var on = x.getAttribute("data-p") === other;
-      x.classList.toggle("on", on);
-      x.classList.toggle("ghost", !on);
-    });
-    state.person = other;
+    $("name-input").value = "";
     checkStart();
     show("screen-start");
   });
