@@ -18,6 +18,7 @@
       <input id="name-input" placeholder="e.g. Sofia" autocomplete="off">
     </div>
     <button id="start-btn" disabled>Start swiping →</button>
+    <p class="note" style="margin-top:20px"><a href="#organizer">Planning for a couple? Combine their codes →</a></p>
   </section>
 
   <!-- SWIPE -->
@@ -77,6 +78,22 @@
     <div class="section" style="margin-top:26px">
       <button class="ghost" id="btn-restart" style="width:100%">↺ Start over (swipe as the other partner)</button>
     </div>
+  </section>
+
+  <!-- ORGANIZER (paste both codes, no swiping) -->
+  <section id="screen-organizer" class="results hidden">
+    <h2>Combine their codes</h2>
+    <p class="sub">Paste each person's share code to see where their tastes overlap and get the itinerary brief. You don't need to swipe yourself.</p>
+    <div class="field">
+      <label>First person's code</label>
+      <textarea class="export" id="org-a" placeholder="Paste their code here…"></textarea>
+    </div>
+    <div class="field">
+      <label>Second person's code</label>
+      <textarea class="export" id="org-b" placeholder="Paste their code here…"></textarea>
+    </div>
+    <button id="org-combine" style="width:100%">Combine &amp; build brief →</button>
+    <p class="note" style="margin-top:14px"><a href="#">← Back to swiping</a></p>
   </section>
 </div>
 

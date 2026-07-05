@@ -21,7 +21,7 @@
 
   var $ = function (id) { return document.getElementById(id); };
   function show(screen) {
-    ["screen-start", "screen-swipe", "screen-rank", "screen-results"]
+    ["screen-start", "screen-swipe", "screen-rank", "screen-results", "screen-organizer"]
       .forEach(function (s) { $(s).classList.add("hidden"); });
     $(screen).classList.remove("hidden");
   }
@@ -214,6 +214,9 @@
     var rec = myRecord();
     try { localStorage.setItem("hm:self", JSON.stringify(rec)); } catch (e) {}
     show("screen-results");
+    $("sec-partner").classList.remove("hidden");   // normal (swiper) flow
+    $("btn-restart").parentNode.classList.remove("hidden");
+    $("results-title").textContent = "Your picks are saved ✓";
     $("results-sub").textContent = rec.likes.length + " favourites, ranked. Now combine with your partner.";
     myShareCode = encodeRec(rec);
   }
@@ -232,6 +235,20 @@
     var other;
     try { other = decodeRec(code); } catch (e) { alert("That code didn't read — check you copied all of it."); return; }
     combine(myRecord(), other);
+  });
+
+  // Organizer: paste two codes, no swiping required
+  $("org-combine").addEventListener("click", function () {
+    var a, b;
+    try { a = decodeRec($("org-a").value); } catch (e) { alert("The first code didn't read — check you pasted all of it."); return; }
+    try { b = decodeRec($("org-b").value); } catch (e) { alert("The second code didn't read — check you pasted all of it."); return; }
+    $("sec-partner").classList.add("hidden");
+    $("results-title").textContent = "Combined results";
+    $("results-sub").textContent = (a.name || "Person 1") + " + " + (b.name || "Person 2") + " — where your tastes meet.";
+    $("btn-restart").parentNode.classList.add("hidden");
+    combine(a, b);
+    show("screen-results");
+    window.scrollTo(0, 0);
   });
 
   function combine(me, other) {
@@ -337,5 +354,16 @@
     document.body.removeChild(ta);
   }
 
-  show("screen-start");
+  function route() {
+    var h = (location.hash || "").replace("#", "");
+    if (h === "organizer") show("screen-organizer");
+    else if (h === "") {
+      // only snap back to start if we're not mid-flow
+      if ($("screen-organizer").classList.contains("hidden") === false) show("screen-start");
+    }
+  }
+  window.addEventListener("hashchange", route);
+
+  if ((location.hash || "").replace("#", "") === "organizer") show("screen-organizer");
+  else show("screen-start");
 })();
