@@ -9,5 +9,5 @@
  * an "All done" screen (nothing to copy). Leave "" to use the manual share-code
  * flow instead.
  */
-window.HM_SUPABASE_URL = "";
-window.HM_SUPABASE_KEY = "";
+window.HM_SUPABASE_URL = "https://sgvppintkqvmnbbyhxih.supabase.co";
+window.HM_SUPABASE_KEY = "sb_publishable_AKF7Vyuo2_oATFclNV9O1w_H5raIsrg";
