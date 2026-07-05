@@ -216,9 +216,9 @@
     show("screen-results");
     myShareCode = encodeRec(rec);
 
-    if (window.HM_SYNC_URL) {
-      // Auto-sync mode: send to the planner's Google Sheet — nothing for them to copy.
-      syncToSheet(rec);
+    if (cloudEnabled()) {
+      // Auto-save mode: send to the planner's private table — nothing to copy.
+      submitToCloud(rec);
       $("sec-partner").classList.add("hidden");
       $("btn-restart").parentNode.classList.remove("hidden");
       $("results-title").textContent = "All done 🎉";
@@ -232,16 +232,22 @@
     }
   }
 
-  function syncToSheet(rec) {
-    var url = window.HM_SYNC_URL;
-    if (!url) return;
+  function cloudEnabled() {
+    return !!(window.HM_SUPABASE_URL && window.HM_SUPABASE_KEY);
+  }
+  function sbHeaders(extra) {
+    var h = { apikey: window.HM_SUPABASE_KEY, Authorization: "Bearer " + window.HM_SUPABASE_KEY };
+    for (var k in (extra || {})) h[k] = extra[k];
+    return h;
+  }
+  function submitToCloud(rec) {
+    if (!cloudEnabled()) return;
     try {
-      fetch(url, {
+      fetch(window.HM_SUPABASE_URL + "/rest/v1/submissions", {
         method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(rec)
-      });
+        headers: sbHeaders({ "Content-Type": "application/json", Prefer: "return=minimal" }),
+        body: JSON.stringify({ name: rec.name, likes: rec.likes, nopes: rec.nopes })
+      }).catch(function () {});
     } catch (e) { /* fire-and-forget */ }
   }
 
@@ -261,11 +267,8 @@
     combine(myRecord(), other);
   });
 
-  // Organizer: paste two codes, no swiping required
-  $("org-combine").addEventListener("click", function () {
-    var a, b;
-    try { a = decodeRec($("org-a").value); } catch (e) { alert("The first code didn't read — check you pasted all of it."); return; }
-    try { b = decodeRec($("org-b").value); } catch (e) { alert("The second code didn't read — check you pasted all of it."); return; }
+  // Organizer: run a combine of any two records (from cloud or pasted codes)
+  function organizerCombine(a, b) {
     $("sec-partner").classList.add("hidden");
     $("results-title").textContent = "Combined results";
     $("results-sub").textContent = (a.name || "Person 1") + " + " + (b.name || "Person 2") + " — where your tastes meet.";
@@ -273,6 +276,67 @@
     combine(a, b);
     show("screen-results");
     window.scrollTo(0, 0);
+  }
+
+  // Manual: paste two codes
+  $("org-combine").addEventListener("click", function () {
+    var a, b;
+    try { a = decodeRec($("org-a").value); } catch (e) { alert("The first code didn't read — check you pasted all of it."); return; }
+    try { b = decodeRec($("org-b").value); } catch (e) { alert("The second code didn't read — check you pasted all of it."); return; }
+    organizerCombine(a, b);
+  });
+
+  // Cloud: load all submissions and pick two
+  var subs = [], selected = [];
+  $("org-load").addEventListener("click", function () {
+    if (!cloudEnabled()) { alert("The cloud store isn't configured yet."); return; }
+    var btn = this;
+    btn.textContent = "Loading…";
+    fetch(window.HM_SUPABASE_URL + "/rest/v1/submissions?select=name,likes,nopes,created_at&order=created_at.desc",
+      { headers: sbHeaders() })
+      .then(function (r) { return r.json(); })
+      .then(function (list) {
+        subs = Array.isArray(list) ? list : [];
+        selected = [];
+        renderSubs();
+        btn.textContent = "Reload submissions ↻";
+        $("org-combine-sel").classList.add("hidden");
+      })
+      .catch(function (e) {
+        btn.textContent = "Load everyone's submissions ↻";
+        alert("Couldn't load submissions: " + e);
+      });
+  });
+
+  function renderSubs() {
+    var el = $("org-list");
+    if (!subs.length) { el.innerHTML = '<p class="note">No submissions yet.</p>'; return; }
+    el.innerHTML = subs.map(function (s, i) {
+      var n = (s.likes || []).length;
+      return '<div class="sub-row" data-i="' + i + '"><span>' + esc(s.name || "(no name)") +
+             '</span><span class="cnt">' + n + " favourites</span></div>";
+    }).join("");
+    Array.prototype.forEach.call(el.querySelectorAll(".sub-row"), function (row) {
+      row.addEventListener("click", function () {
+        var i = +row.getAttribute("data-i");
+        var pos = selected.indexOf(i);
+        if (pos >= 0) { selected.splice(pos, 1); row.classList.remove("sel"); }
+        else {
+          if (selected.length >= 2) {
+            var old = selected.shift();
+            var oldRow = el.querySelector('.sub-row[data-i="' + old + '"]');
+            if (oldRow) oldRow.classList.remove("sel");
+          }
+          selected.push(i); row.classList.add("sel");
+        }
+        $("org-combine-sel").classList.toggle("hidden", selected.length !== 2);
+      });
+    });
+  }
+
+  $("org-combine-sel").addEventListener("click", function () {
+    if (selected.length !== 2) return;
+    organizerCombine(subs[selected[0]], subs[selected[1]]);
   });
 
   function combine(me, other) {
@@ -387,6 +451,12 @@
     }
   }
   window.addEventListener("hashchange", route);
+
+  // Until the cloud store is configured, hide the load panel and default to manual codes
+  if (!cloudEnabled()) {
+    $("org-cloud").classList.add("hidden");
+    $("org-manual").setAttribute("open", "");
+  }
 
   if ((location.hash || "").replace("#", "") === "organizer") show("screen-organizer");
   else show("screen-start");

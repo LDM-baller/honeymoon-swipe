@@ -1,7 +1,13 @@
 /* Honeymoon Swipe — runtime config
  *
- * HM_SYNC_URL: the Google Apps Script Web App URL (…/exec) that receives each
- * person's swipes and appends them to your private Google Sheet.
- * Leave "" to fall back to the manual share-code flow.
+ * Fill these with your Supabase project's values (Settings → API):
+ *   HM_SUPABASE_URL : the Project URL, e.g. https://abcdefgh.supabase.co
+ *   HM_SUPABASE_KEY : the "anon public" API key (safe to expose — it's designed
+ *                     for the browser and is limited by row-level security)
+ *
+ * When both are set, finishing swipers auto-save to your private table and see
+ * an "All done" screen (nothing to copy). Leave "" to use the manual share-code
+ * flow instead.
  */
-window.HM_SYNC_URL = "";
+window.HM_SUPABASE_URL = "";
+window.HM_SUPABASE_KEY = "";

@@ -82,17 +82,28 @@
 
   <!-- ORGANIZER (paste both codes, no swiping) -->
   <section id="screen-organizer" class="results hidden">
-    <h2>Combine their codes</h2>
-    <p class="sub">Paste each person's share code to see where their tastes overlap and get the itinerary brief. You don't need to swipe yourself.</p>
-    <div class="field">
-      <label>First person's code</label>
-      <textarea class="export" id="org-a" placeholder="Paste their code here…"></textarea>
+    <h2>Planner view</h2>
+    <p class="sub">Load everyone who's swiped, tap any two, and combine them into an itinerary brief. You don't need to swipe yourself.</p>
+
+    <div class="section" id="org-cloud">
+      <button id="org-load" style="width:100%">Load everyone's submissions ↻</button>
+      <div id="org-list" style="margin-top:12px"></div>
+      <button id="org-combine-sel" class="hidden" style="width:100%;margin-top:6px">Combine selected two →</button>
     </div>
-    <div class="field">
-      <label>Second person's code</label>
-      <textarea class="export" id="org-b" placeholder="Paste their code here…"></textarea>
-    </div>
-    <button id="org-combine" style="width:100%">Combine &amp; build brief →</button>
+
+    <details id="org-manual" class="section">
+      <summary class="note" style="cursor:pointer">…or paste two share codes manually</summary>
+      <div class="field" style="margin-top:12px">
+        <label>First person's code</label>
+        <textarea class="export" id="org-a" placeholder="Paste their code here…"></textarea>
+      </div>
+      <div class="field">
+        <label>Second person's code</label>
+        <textarea class="export" id="org-b" placeholder="Paste their code here…"></textarea>
+      </div>
+      <button id="org-combine" style="width:100%">Combine &amp; build brief →</button>
+    </details>
+
     <p class="note" style="margin-top:14px"><a href="#">← Back to swiping</a></p>
   </section>
 </div>
