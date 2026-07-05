@@ -214,11 +214,35 @@
     var rec = myRecord();
     try { localStorage.setItem("hm:self", JSON.stringify(rec)); } catch (e) {}
     show("screen-results");
-    $("sec-partner").classList.remove("hidden");   // normal (swiper) flow
-    $("btn-restart").parentNode.classList.remove("hidden");
-    $("results-title").textContent = "Your picks are saved ✓";
-    $("results-sub").textContent = rec.likes.length + " favourites, ranked. Now combine with your partner.";
     myShareCode = encodeRec(rec);
+
+    if (window.HM_SYNC_URL) {
+      // Auto-sync mode: send to the planner's Google Sheet — nothing for them to copy.
+      syncToSheet(rec);
+      $("sec-partner").classList.add("hidden");
+      $("btn-restart").parentNode.classList.remove("hidden");
+      $("results-title").textContent = "All done 🎉";
+      $("results-sub").textContent = rec.likes.length + " favourites sent to the planner. Nothing else to do — thank you!";
+    } else {
+      // Manual share-code fallback.
+      $("sec-partner").classList.remove("hidden");
+      $("btn-restart").parentNode.classList.remove("hidden");
+      $("results-title").textContent = "Your picks are saved ✓";
+      $("results-sub").textContent = rec.likes.length + " favourites, ranked. Now combine with your partner.";
+    }
+  }
+
+  function syncToSheet(rec) {
+    var url = window.HM_SYNC_URL;
+    if (!url) return;
+    try {
+      fetch(url, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(rec)
+      });
+    } catch (e) { /* fire-and-forget */ }
   }
 
   var myShareCode = "";
